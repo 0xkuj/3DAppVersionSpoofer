@@ -1,0 +1,9 @@
+Package: com.0xkuj.spoofappversion
+Name: Spoof App Version
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: An awesome MobileSubstrate tweak!
+Maintainer: 0xkuj
+Author: 0xkuj
+Section: Tweaks
+Depends: mobilesubstrate (>= 0.9.5000)
