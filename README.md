@@ -1,2 +1,2 @@
-# spoofversion3dmenu
-spoof version right out of your 3d menu
+# 3DAppVersionSpoofer
+Spoof App Version right from your 3D menu

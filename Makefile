@@ -7,9 +7,9 @@ DEBUG = 0
 
 include $(THEOS)/makefiles/common.mk
 
-TWEAK_NAME = SpoofAppVersion
+TWEAK_NAME = 3DAppVersionSpoofer
 
-SpoofAppVersion_FILES = Tweak.xm
-SpoofAppVersion_CFLAGS = -fobjc-arc
+3DAppVersionSpoofer_FILES = Tweak.xm
+3DAppVersionSpoofer_CFLAGS = -fobjc-arc
 
 include $(THEOS_MAKE_PATH)/tweak.mk
