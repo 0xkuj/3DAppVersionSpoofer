@@ -9,7 +9,7 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = SpoofAppVersion
 
-SpoofAppVersion_FILES = Tweak.x
+SpoofAppVersion_FILES = Tweak.xm
 SpoofAppVersion_CFLAGS = -fobjc-arc
 
 include $(THEOS_MAKE_PATH)/tweak.mk
