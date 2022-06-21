@@ -22,12 +22,12 @@
 #define _LOGOS_RETURN_RETAINED
 #endif
 
-@class NSBundle; @class SBSApplicationShortcutCustomImageIcon; @class SBFolderIcon; @class SBWidgetIcon; @class SBIconView; @class SBSApplicationShortcutItem; 
+@class SBIconView; @class SBSApplicationShortcutItem; @class SBSApplicationShortcutCustomImageIcon; @class SBWidgetIcon; @class SBFolderIcon; @class NSBundle; 
 static void (*_logos_orig$_ungrouped$SBIconView$setApplicationShortcutItems$)(_LOGOS_SELF_TYPE_NORMAL SBIconView* _LOGOS_SELF_CONST, SEL, NSArray *); static void _logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$(_LOGOS_SELF_TYPE_NORMAL SBIconView* _LOGOS_SELF_CONST, SEL, NSArray *); static void (*_logos_meta_orig$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$)(_LOGOS_SELF_TYPE_NORMAL Class _LOGOS_SELF_CONST, SEL, SBSApplicationShortcutItem *, NSString *, SBIconView *); static void _logos_meta_method$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$(_LOGOS_SELF_TYPE_NORMAL Class _LOGOS_SELF_CONST, SEL, SBSApplicationShortcutItem *, NSString *, SBIconView *); static NSDictionary * (*_logos_orig$_ungrouped$NSBundle$infoDictionary)(_LOGOS_SELF_TYPE_NORMAL NSBundle* _LOGOS_SELF_CONST, SEL); static NSDictionary * _logos_method$_ungrouped$NSBundle$infoDictionary(_LOGOS_SELF_TYPE_NORMAL NSBundle* _LOGOS_SELF_CONST, SEL); 
-static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBWidgetIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBWidgetIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBFolderIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBFolderIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBSApplicationShortcutCustomImageIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBSApplicationShortcutCustomImageIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBSApplicationShortcutItem(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBSApplicationShortcutItem"); } return _klass; }
+static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBWidgetIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBWidgetIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBFolderIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBFolderIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBSApplicationShortcutItem(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBSApplicationShortcutItem"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBSApplicationShortcutCustomImageIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBSApplicationShortcutCustomImageIcon"); } return _klass; }
 #line 3 "Tweak.xm"
 
-static void _logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$(_LOGOS_SELF_TYPE_NORMAL SBIconView* _LOGOS_SELF_CONST __unused self, SEL __unused _cmd, NSArray * ShortcutItems) {
+static void _logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$(_LOGOS_SELF_TYPE_NORMAL SBIconView* _LOGOS_SELF_CONST __unused self, SEL __unused _cmd, NSArray * shortcutItems) {
 	
 	
 	
@@ -35,18 +35,23 @@ static void _logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$(_LO
 	
 	
 
-	NSMutableArray *editedItems = [NSMutableArray arrayWithArray:ShortcutItems ? : @[]];
+	NSMutableArray *editedItems = [NSMutableArray arrayWithArray:shortcutItems ? : @[]];
 	if (![self.icon isKindOfClass:_logos_static_class_lookup$SBFolderIcon()] && ![self.icon isKindOfClass:_logos_static_class_lookup$SBWidgetIcon()]) { 
-		SBSApplicationShortcutItem *ShortcutItems = [[_logos_static_class_lookup$SBSApplicationShortcutItem() alloc] init];
-		ShortcutItems.localizedTitle = @"Spoof App Version";
-		ShortcutItems.type = SPOOF_VER_TWEAK_BUNDLE;
-		NSData *ImageData = UIImagePNGRepresentation([UIImage imageNamed:@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakever@2x.png"]);
-		if (ImageData) {
-			SBSApplicationShortcutCustomImageIcon *IconImage = [[_logos_static_class_lookup$SBSApplicationShortcutCustomImageIcon() alloc] initWithImagePNGData:ImageData];
-			ShortcutItems.icon = IconImage;
+		SBSApplicationShortcutItem *shortcutItems = [[_logos_static_class_lookup$SBSApplicationShortcutItem() alloc] init];
+		shortcutItems.localizedTitle = @"Spoof App Version";
+		shortcutItems.type = SPOOF_VER_TWEAK_BUNDLE;
+		NSData *imgData = UIImagePNGRepresentation([UIImage imageNamed:@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakeverblack@2x.png"]);
+		
+		
+		if ([UITraitCollection currentTraitCollection].userInterfaceStyle == UIUserInterfaceStyleDark) {
+			imgData = UIImagePNGRepresentation([UIImage imageNamed:@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakeverwhite@2x.png"]);
 		}
-		if (ShortcutItems) {
-			[editedItems addObject:ShortcutItems];
+		if (imgData) {
+			SBSApplicationShortcutCustomImageIcon *iconImage = [[_logos_static_class_lookup$SBSApplicationShortcutCustomImageIcon() alloc] initWithImagePNGData:imgData];
+			shortcutItems.icon = iconImage;
+		}
+		if (shortcutItems) {
+			[editedItems addObject:shortcutItems];
 		}
 	}
  	_logos_orig$_ungrouped$SBIconView$setApplicationShortcutItems$(self, _cmd, editedItems);
@@ -116,4 +121,4 @@ static NSDictionary * _logos_method$_ungrouped$NSBundle$infoDictionary(_LOGOS_SE
 
 static __attribute__((constructor)) void _logosLocalInit() {
 {Class _logos_class$_ungrouped$SBIconView = objc_getClass("SBIconView"); Class _logos_metaclass$_ungrouped$SBIconView = object_getClass(_logos_class$_ungrouped$SBIconView); { MSHookMessageEx(_logos_class$_ungrouped$SBIconView, @selector(setApplicationShortcutItems:), (IMP)&_logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$, (IMP*)&_logos_orig$_ungrouped$SBIconView$setApplicationShortcutItems$);}{ MSHookMessageEx(_logos_metaclass$_ungrouped$SBIconView, @selector(activateShortcut:withBundleIdentifier:forIconView:), (IMP)&_logos_meta_method$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$, (IMP*)&_logos_meta_orig$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$);}Class _logos_class$_ungrouped$NSBundle = objc_getClass("NSBundle"); { MSHookMessageEx(_logos_class$_ungrouped$NSBundle, @selector(infoDictionary), (IMP)&_logos_method$_ungrouped$NSBundle$infoDictionary, (IMP*)&_logos_orig$_ungrouped$NSBundle$infoDictionary);}} }
-#line 91 "Tweak.xm"
+#line 96 "Tweak.xm"

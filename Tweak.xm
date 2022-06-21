@@ -1,7 +1,7 @@
 #include "Tweak.h"
 
 %hook SBIconView
-- (void)setApplicationShortcutItems:(NSArray *)ShortcutItems {
+- (void)setApplicationShortcutItems:(NSArray *)shortcutItems {
 	//bug with spotlight..
 	//SBApplication *sbApp = [self.icon valueForKey:@"_application"];
 	//SBApplication *sbApp = MSHookIvar<SBApplication *>((id)self.icon, "_application");
@@ -9,18 +9,23 @@
 	//		return %orig;
 	//}
 
-	NSMutableArray *editedItems = [NSMutableArray arrayWithArray:ShortcutItems ? : @[]];
+	NSMutableArray *editedItems = [NSMutableArray arrayWithArray:shortcutItems ? : @[]];
 	if (![self.icon isKindOfClass:%c(SBFolderIcon)] && ![self.icon isKindOfClass:%c(SBWidgetIcon)]) { 
-		SBSApplicationShortcutItem *ShortcutItems = [[%c(SBSApplicationShortcutItem) alloc] init];
-		ShortcutItems.localizedTitle = @"Spoof App Version";
-		ShortcutItems.type = SPOOF_VER_TWEAK_BUNDLE;
-		NSData *ImageData = UIImagePNGRepresentation([UIImage imageNamed:@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakever@2x.png"]);
-		if (ImageData) {
-			SBSApplicationShortcutCustomImageIcon *IconImage = [[%c(SBSApplicationShortcutCustomImageIcon) alloc] initWithImagePNGData:ImageData];
-			ShortcutItems.icon = IconImage;
+		SBSApplicationShortcutItem *shortcutItems = [[%c(SBSApplicationShortcutItem) alloc] init];
+		shortcutItems.localizedTitle = @"Spoof App Version";
+		shortcutItems.type = SPOOF_VER_TWEAK_BUNDLE;
+		NSData *imgData = UIImagePNGRepresentation([UIImage imageNamed:@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakeverblack@2x.png"]);
+		//dark mode check
+		//if (@available(iOS 13, *)) {
+		if ([UITraitCollection currentTraitCollection].userInterfaceStyle == UIUserInterfaceStyleDark) {
+			imgData = UIImagePNGRepresentation([UIImage imageNamed:@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakeverwhite@2x.png"]);
 		}
-		if (ShortcutItems) {
-			[editedItems addObject:ShortcutItems];
+		if (imgData) {
+			SBSApplicationShortcutCustomImageIcon *iconImage = [[%c(SBSApplicationShortcutCustomImageIcon) alloc] initWithImagePNGData:imgData];
+			shortcutItems.icon = iconImage;
+		}
+		if (shortcutItems) {
+			[editedItems addObject:shortcutItems];
 		}
 	}
  	%orig(editedItems);
