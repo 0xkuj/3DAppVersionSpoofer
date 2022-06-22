@@ -22,9 +22,9 @@
 #define _LOGOS_RETURN_RETAINED
 #endif
 
-@class SBIconView; @class SBSApplicationShortcutItem; @class SBSApplicationShortcutCustomImageIcon; @class SBWidgetIcon; @class SBFolderIcon; @class NSBundle; 
+@class SBSApplicationShortcutItem; @class SBWidgetIcon; @class NSBundle; @class SBIconView; @class SBSApplicationShortcutCustomImageIcon; @class SBFolderIcon; 
 static void (*_logos_orig$_ungrouped$SBIconView$setApplicationShortcutItems$)(_LOGOS_SELF_TYPE_NORMAL SBIconView* _LOGOS_SELF_CONST, SEL, NSArray *); static void _logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$(_LOGOS_SELF_TYPE_NORMAL SBIconView* _LOGOS_SELF_CONST, SEL, NSArray *); static void (*_logos_meta_orig$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$)(_LOGOS_SELF_TYPE_NORMAL Class _LOGOS_SELF_CONST, SEL, SBSApplicationShortcutItem *, NSString *, SBIconView *); static void _logos_meta_method$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$(_LOGOS_SELF_TYPE_NORMAL Class _LOGOS_SELF_CONST, SEL, SBSApplicationShortcutItem *, NSString *, SBIconView *); static NSDictionary * (*_logos_orig$_ungrouped$NSBundle$infoDictionary)(_LOGOS_SELF_TYPE_NORMAL NSBundle* _LOGOS_SELF_CONST, SEL); static NSDictionary * _logos_method$_ungrouped$NSBundle$infoDictionary(_LOGOS_SELF_TYPE_NORMAL NSBundle* _LOGOS_SELF_CONST, SEL); 
-static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBWidgetIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBWidgetIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBFolderIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBFolderIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBSApplicationShortcutItem(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBSApplicationShortcutItem"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBSApplicationShortcutCustomImageIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBSApplicationShortcutCustomImageIcon"); } return _klass; }
+static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBSApplicationShortcutCustomImageIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBSApplicationShortcutCustomImageIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBFolderIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBFolderIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBSApplicationShortcutItem(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBSApplicationShortcutItem"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBWidgetIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBWidgetIcon"); } return _klass; }
 #line 3 "Tweak.xm"
 
 static void _logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$(_LOGOS_SELF_TYPE_NORMAL SBIconView* _LOGOS_SELF_CONST __unused self, SEL __unused _cmd, NSArray * shortcutItems) {
@@ -72,13 +72,15 @@ static void _logos_meta_method$_ungrouped$SBIconView$activateShortcut$withBundle
 
 		[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {textField.placeholder = @"Enter Version Number"; textField.keyboardType = UIKeyboardTypeDecimalPad;}];
 		UIAlertAction *setNewValue = [UIAlertAction actionWithTitle:@"Set Spoofed Version" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-			[prefPlist setObject:[[alertController textFields][0] text] forKey:bundleID];
+			NSLog(@"omriku text field? %d",[[alertController textFields][0] text].length > 0);
+			NSString *answerFromTextField = ([[alertController textFields][0] text].length > 0)  ? [[alertController textFields][0] text] : @"0";
+			[prefPlist setObject:answerFromTextField forKey:bundleID];
 			[prefPlist writeToFile:SPOOF_VER_PLIST atomically:YES];
 		}];
 
 		[alertController addAction:setNewValue];
 
-		UIAlertAction *setDefaultValue = [UIAlertAction actionWithTitle:@"Set Default Version" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+		UIAlertAction *setDefaultValue = [UIAlertAction actionWithTitle:@"Reset to Default Version" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 			
 			CGFloat defaultValue = 0.0f;
 			NSNumber *numberFromFloat = [NSNumber numberWithFloat:defaultValue];
@@ -121,4 +123,4 @@ static NSDictionary * _logos_method$_ungrouped$NSBundle$infoDictionary(_LOGOS_SE
 
 static __attribute__((constructor)) void _logosLocalInit() {
 {Class _logos_class$_ungrouped$SBIconView = objc_getClass("SBIconView"); Class _logos_metaclass$_ungrouped$SBIconView = object_getClass(_logos_class$_ungrouped$SBIconView); { MSHookMessageEx(_logos_class$_ungrouped$SBIconView, @selector(setApplicationShortcutItems:), (IMP)&_logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$, (IMP*)&_logos_orig$_ungrouped$SBIconView$setApplicationShortcutItems$);}{ MSHookMessageEx(_logos_metaclass$_ungrouped$SBIconView, @selector(activateShortcut:withBundleIdentifier:forIconView:), (IMP)&_logos_meta_method$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$, (IMP*)&_logos_meta_orig$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$);}Class _logos_class$_ungrouped$NSBundle = objc_getClass("NSBundle"); { MSHookMessageEx(_logos_class$_ungrouped$NSBundle, @selector(infoDictionary), (IMP)&_logos_method$_ungrouped$NSBundle$infoDictionary, (IMP*)&_logos_orig$_ungrouped$NSBundle$infoDictionary);}} }
-#line 96 "Tweak.xm"
+#line 98 "Tweak.xm"

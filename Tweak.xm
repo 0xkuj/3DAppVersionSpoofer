@@ -46,13 +46,14 @@
 
 		[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {textField.placeholder = @"Enter Version Number"; textField.keyboardType = UIKeyboardTypeDecimalPad;}];
 		UIAlertAction *setNewValue = [UIAlertAction actionWithTitle:@"Set Spoofed Version" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-			[prefPlist setObject:[[alertController textFields][0] text] forKey:bundleID];
+			NSString *answerFromTextField = ([[alertController textFields][0] text].length > 0) ? [[alertController textFields][0] text] : @"0";
+			[prefPlist setObject:answerFromTextField forKey:bundleID];
 			[prefPlist writeToFile:SPOOF_VER_PLIST atomically:YES];
 		}];
 
 		[alertController addAction:setNewValue];
 
-		UIAlertAction *setDefaultValue = [UIAlertAction actionWithTitle:@"Set Default Version" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+		UIAlertAction *setDefaultValue = [UIAlertAction actionWithTitle:@"Reset to Default Version" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 			//0 means use original version!
 			CGFloat defaultValue = 0.0f;
 			NSNumber *numberFromFloat = [NSNumber numberWithFloat:defaultValue];
