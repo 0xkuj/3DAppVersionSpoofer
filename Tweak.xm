@@ -71,7 +71,10 @@
 		[tempWindowForPrompt makeKeyAndVisible];
 		tempWindowForPrompt.tintColor = [[UIWindow valueForKey:@"keyWindow"] tintColor];
 		[tempWindowForPrompt.rootViewController presentViewController:alertController animated:YES completion:nil];
+	} else {
+		%orig;
 	}
+
 }
 %end
 
