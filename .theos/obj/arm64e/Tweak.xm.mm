@@ -1,6 +1,13 @@
 #line 1 "Tweak.xm"
 #include "Tweak.h"
 
+BOOL isTweakEnabled, is3DMenu;
+static void loadPrefs() { 
+	NSMutableDictionary* mainPreferenceDict = [[NSMutableDictionary alloc] initWithContentsOfFile:SPOOF_VER_PLIST];
+	isTweakEnabled = [mainPreferenceDict objectForKey:@"isTweakEnabled"] ? [[mainPreferenceDict objectForKey:@"isTweakEnabled"] boolValue] : YES;
+	is3DMenu = [mainPreferenceDict objectForKey:@"is3DMenu"] ? [[mainPreferenceDict objectForKey:@"is3DMenu"] boolValue] : YES;
+}
+
 
 #include <substrate.h>
 #if defined(__clang__)
@@ -22,10 +29,10 @@
 #define _LOGOS_RETURN_RETAINED
 #endif
 
-@class SBSApplicationShortcutItem; @class SBSApplicationShortcutCustomImageIcon; @class SBWidgetIcon; @class SBFolderIcon; @class SBIconView; @class NSBundle; 
+@class SBSApplicationShortcutItem; @class SBSApplicationShortcutCustomImageIcon; @class SBIconView; @class NSBundle; @class SBWidgetIcon; @class SBFolderIcon; 
 static void (*_logos_orig$_ungrouped$SBIconView$setApplicationShortcutItems$)(_LOGOS_SELF_TYPE_NORMAL SBIconView* _LOGOS_SELF_CONST, SEL, NSArray *); static void _logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$(_LOGOS_SELF_TYPE_NORMAL SBIconView* _LOGOS_SELF_CONST, SEL, NSArray *); static void (*_logos_meta_orig$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$)(_LOGOS_SELF_TYPE_NORMAL Class _LOGOS_SELF_CONST, SEL, SBSApplicationShortcutItem *, NSString *, SBIconView *); static void _logos_meta_method$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$(_LOGOS_SELF_TYPE_NORMAL Class _LOGOS_SELF_CONST, SEL, SBSApplicationShortcutItem *, NSString *, SBIconView *); static NSDictionary * (*_logos_orig$_ungrouped$NSBundle$infoDictionary)(_LOGOS_SELF_TYPE_NORMAL NSBundle* _LOGOS_SELF_CONST, SEL); static NSDictionary * _logos_method$_ungrouped$NSBundle$infoDictionary(_LOGOS_SELF_TYPE_NORMAL NSBundle* _LOGOS_SELF_CONST, SEL); 
-static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBSApplicationShortcutCustomImageIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBSApplicationShortcutCustomImageIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBSApplicationShortcutItem(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBSApplicationShortcutItem"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBWidgetIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBWidgetIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBFolderIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBFolderIcon"); } return _klass; }
-#line 3 "Tweak.xm"
+static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBWidgetIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBWidgetIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBFolderIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBFolderIcon"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBSApplicationShortcutItem(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBSApplicationShortcutItem"); } return _klass; }static __inline__ __attribute__((always_inline)) __attribute__((unused)) Class _logos_static_class_lookup$SBSApplicationShortcutCustomImageIcon(void) { static Class _klass; if(!_klass) { _klass = objc_getClass("SBSApplicationShortcutCustomImageIcon"); } return _klass; }
+#line 10 "Tweak.xm"
 
 static void _logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$(_LOGOS_SELF_TYPE_NORMAL SBIconView* _LOGOS_SELF_CONST __unused self, SEL __unused _cmd, NSArray * shortcutItems) {
 	
@@ -34,6 +41,9 @@ static void _logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$(_LO
 	
 	
 	
+	if (!is3DMenu) {
+		return _logos_orig$_ungrouped$SBIconView$setApplicationShortcutItems$(self, _cmd, shortcutItems);
+	}
 
 	NSMutableArray *editedItems = [NSMutableArray arrayWithArray:shortcutItems ? : @[]];
 	if (![self.icon isKindOfClass:_logos_static_class_lookup$SBFolderIcon()] && ![self.icon isKindOfClass:_logos_static_class_lookup$SBWidgetIcon()]) { 
@@ -59,7 +69,7 @@ static void _logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$(_LO
 
 static void _logos_meta_method$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$(_LOGOS_SELF_TYPE_NORMAL Class _LOGOS_SELF_CONST __unused self, SEL __unused _cmd, SBSApplicationShortcutItem * item, NSString * bundleID, SBIconView * iconView) {
     if ([item.type isEqualToString:SPOOF_VER_TWEAK_BUNDLE]) {
-		NSString *appName = [[NSBundle bundleWithIdentifier:bundleID] infoDictionary][@"CFBundleShortVersionString"];
+		NSString *appDefaultVersion = [[NSBundle bundleWithIdentifier:bundleID] infoDictionary][@"CFBundleShortVersionString"];
 		NSMutableDictionary *prefPlist = [NSMutableDictionary dictionary];
 		[prefPlist addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:SPOOF_VER_PLIST]];
 		NSString *currentVer = prefPlist[bundleID];
@@ -67,13 +77,14 @@ static void _logos_meta_method$_ungrouped$SBIconView$activateShortcut$withBundle
 			currentVer = @"Default";
 		}
 	    UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"3DAppVersionSpoofer"
-																	message:[NSString stringWithFormat:@"WARNING: This can cause unexpected behavior in your app.\nBundle ID: %@\nCurrent Spoofed Version: %@\nDefault App Version: %@\n\nWhat is the version number you want to spoof?",bundleID,currentVer,appName]
+																	message:[NSString stringWithFormat:@"WARNING: This can cause unexpected behavior in your app.\nBundle ID: %@\nCurrent Spoofed Version: %@\nDefault App Version: %@\n\nWhat is the version number you want to spoof?",bundleID,currentVer,appDefaultVersion]
 																	preferredStyle:UIAlertControllerStyleAlert];
 
 		[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {textField.placeholder = @"Enter Version Number"; textField.keyboardType = UIKeyboardTypeDecimalPad;}];
 		UIAlertAction *setNewValue = [UIAlertAction actionWithTitle:@"Set Spoofed Version" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
 			NSString *answerFromTextField = ([[alertController textFields][0] text].length > 0) ? [[alertController textFields][0] text] : @"0";
-			[prefPlist setObject:answerFromTextField forKey:bundleID];
+			
+			[prefPlist setObject:[answerFromTextField stringByReplacingOccurrencesOfString:@"," withString:@"."] forKey:bundleID];
 			[prefPlist writeToFile:SPOOF_VER_PLIST atomically:YES];
 		}];
 
@@ -107,14 +118,14 @@ static void _logos_meta_method$_ungrouped$SBIconView$activateShortcut$withBundle
 
 NSString *versionToSpoof = nil;
 static NSDictionary * _logos_method$_ungrouped$NSBundle$infoDictionary(_LOGOS_SELF_TYPE_NORMAL NSBundle* _LOGOS_SELF_CONST __unused self, SEL __unused _cmd) {
-	if (!self || ![self isLoaded] || ![[self bundleURL].absoluteString containsString:@"Application"]) {
+	if (!self || ![self isLoaded] || ![[self bundleURL].absoluteString containsString:@"Application"] || !isTweakEnabled) {
 		return _logos_orig$_ungrouped$NSBundle$infoDictionary(self, _cmd);
 	} else {	
 	    NSDictionary *dictionary = _logos_orig$_ungrouped$NSBundle$infoDictionary(self, _cmd);
 	    NSMutableDictionary *moddedDictionary = [NSMutableDictionary dictionaryWithDictionary:dictionary];
 		NSString *appBundleID = moddedDictionary[@"CFBundleIdentifier"];
 		NSDictionary* modifiedBundlesDict = [[NSDictionary alloc] initWithContentsOfFile:SPOOF_VER_PLIST];
-		if (appBundleID && [modifiedBundlesDict objectForKey:appBundleID] && ![modifiedBundlesDict[appBundleID] isEqualToString:@"0"]) {
+		if ((appBundleID) && ([modifiedBundlesDict objectForKey:appBundleID]) && ([[modifiedBundlesDict objectForKey:appBundleID] length] > 0) && (![modifiedBundlesDict[appBundleID] isEqualToString:@"0"])) {
 			versionToSpoof = [[NSString alloc] init];
 			versionToSpoof = modifiedBundlesDict[appBundleID];
 			[moddedDictionary setValue:versionToSpoof forKey:@"CFBundleShortVersionString"];
@@ -123,6 +134,11 @@ static NSDictionary * _logos_method$_ungrouped$NSBundle$infoDictionary(_LOGOS_SE
 	}
 }
 
+
+static __attribute__((constructor)) void _logosLocalCtor_e513b3be(int __unused argc, char __unused **argv, char __unused **envp){
+	loadPrefs();
+    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("com.0xkuj.3dappversionspoofer.settingschanged"), NULL, CFNotificationSuspensionBehaviorCoalesce);
+}
 static __attribute__((constructor)) void _logosLocalInit() {
 {Class _logos_class$_ungrouped$SBIconView = objc_getClass("SBIconView"); Class _logos_metaclass$_ungrouped$SBIconView = object_getClass(_logos_class$_ungrouped$SBIconView); { MSHookMessageEx(_logos_class$_ungrouped$SBIconView, @selector(setApplicationShortcutItems:), (IMP)&_logos_method$_ungrouped$SBIconView$setApplicationShortcutItems$, (IMP*)&_logos_orig$_ungrouped$SBIconView$setApplicationShortcutItems$);}{ MSHookMessageEx(_logos_metaclass$_ungrouped$SBIconView, @selector(activateShortcut:withBundleIdentifier:forIconView:), (IMP)&_logos_meta_method$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$, (IMP*)&_logos_meta_orig$_ungrouped$SBIconView$activateShortcut$withBundleIdentifier$forIconView$);}Class _logos_class$_ungrouped$NSBundle = objc_getClass("NSBundle"); { MSHookMessageEx(_logos_class$_ungrouped$NSBundle, @selector(infoDictionary), (IMP)&_logos_method$_ungrouped$NSBundle$infoDictionary, (IMP*)&_logos_orig$_ungrouped$NSBundle$infoDictionary);}} }
-#line 100 "Tweak.xm"
+#line 116 "Tweak.xm"

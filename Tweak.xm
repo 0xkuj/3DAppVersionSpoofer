@@ -1,5 +1,12 @@
 #include "Tweak.h"
 
+BOOL isTweakEnabled, is3DMenu;
+static void loadPrefs() { 
+	NSMutableDictionary* mainPreferenceDict = [[NSMutableDictionary alloc] initWithContentsOfFile:SPOOF_VER_PLIST];
+	isTweakEnabled = [mainPreferenceDict objectForKey:@"isTweakEnabled"] ? [[mainPreferenceDict objectForKey:@"isTweakEnabled"] boolValue] : YES;
+	is3DMenu = [mainPreferenceDict objectForKey:@"is3DMenu"] ? [[mainPreferenceDict objectForKey:@"is3DMenu"] boolValue] : YES;
+}
+
 %hook SBIconView
 - (void)setApplicationShortcutItems:(NSArray *)shortcutItems {
 	//bug with spotlight..
@@ -8,6 +15,9 @@
 	//if (sbApp.isSystemApplication || [sbApp.bundleIdentifier containsString:@"com.apple"]) {
 	//		return %orig;
 	//}
+	if (!is3DMenu) {
+		return %orig;
+	}
 
 	NSMutableArray *editedItems = [NSMutableArray arrayWithArray:shortcutItems ? : @[]];
 	if (![self.icon isKindOfClass:%c(SBFolderIcon)] && ![self.icon isKindOfClass:%c(SBWidgetIcon)]) { 
@@ -33,7 +43,7 @@
 
 + (void)activateShortcut:(SBSApplicationShortcutItem *)item withBundleIdentifier:(NSString *)bundleID forIconView:(SBIconView *)iconView {
     if ([item.type isEqualToString:SPOOF_VER_TWEAK_BUNDLE]) {
-		NSString *appName = [[NSBundle bundleWithIdentifier:bundleID] infoDictionary][@"CFBundleShortVersionString"];
+		NSString *appDefaultVersion = [[NSBundle bundleWithIdentifier:bundleID] infoDictionary][@"CFBundleShortVersionString"];
 		NSMutableDictionary *prefPlist = [NSMutableDictionary dictionary];
 		[prefPlist addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:SPOOF_VER_PLIST]];
 		NSString *currentVer = prefPlist[bundleID];
@@ -41,13 +51,14 @@
 			currentVer = @"Default";
 		}
 	    UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"3DAppVersionSpoofer"
-																	message:[NSString stringWithFormat:@"WARNING: This can cause unexpected behavior in your app.\nBundle ID: %@\nCurrent Spoofed Version: %@\nDefault App Version: %@\n\nWhat is the version number you want to spoof?",bundleID,currentVer,appName]
+																	message:[NSString stringWithFormat:@"WARNING: This can cause unexpected behavior in your app.\nBundle ID: %@\nCurrent Spoofed Version: %@\nDefault App Version: %@\n\nWhat is the version number you want to spoof?",bundleID,currentVer,appDefaultVersion]
 																	preferredStyle:UIAlertControllerStyleAlert];
 
 		[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {textField.placeholder = @"Enter Version Number"; textField.keyboardType = UIKeyboardTypeDecimalPad;}];
 		UIAlertAction *setNewValue = [UIAlertAction actionWithTitle:@"Set Spoofed Version" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
 			NSString *answerFromTextField = ([[alertController textFields][0] text].length > 0) ? [[alertController textFields][0] text] : @"0";
-			[prefPlist setObject:answerFromTextField forKey:bundleID];
+			//support regions that have comma instead of dot 0-0
+			[prefPlist setObject:[answerFromTextField stringByReplacingOccurrencesOfString:@"," withString:@"."] forKey:bundleID];
 			[prefPlist writeToFile:SPOOF_VER_PLIST atomically:YES];
 		}];
 
@@ -81,14 +92,14 @@
 %hook NSBundle
 NSString *versionToSpoof = nil;
 -(NSDictionary *)infoDictionary {
-	if (!self || ![self isLoaded] || ![[self bundleURL].absoluteString containsString:@"Application"]) {
+	if (!self || ![self isLoaded] || ![[self bundleURL].absoluteString containsString:@"Application"] || !isTweakEnabled) {
 		return %orig;
 	} else {	
 	    NSDictionary *dictionary = %orig;
 	    NSMutableDictionary *moddedDictionary = [NSMutableDictionary dictionaryWithDictionary:dictionary];
 		NSString *appBundleID = moddedDictionary[@"CFBundleIdentifier"];
 		NSDictionary* modifiedBundlesDict = [[NSDictionary alloc] initWithContentsOfFile:SPOOF_VER_PLIST];
-		if (appBundleID && [modifiedBundlesDict objectForKey:appBundleID] && ![modifiedBundlesDict[appBundleID] isEqualToString:@"0"]) {
+		if ((appBundleID) && ([modifiedBundlesDict objectForKey:appBundleID]) && ([[modifiedBundlesDict objectForKey:appBundleID] length] > 0) && (![modifiedBundlesDict[appBundleID] isEqualToString:@"0"])) {
 			versionToSpoof = [[NSString alloc] init];
 			versionToSpoof = modifiedBundlesDict[appBundleID];
 			[moddedDictionary setValue:versionToSpoof forKey:@"CFBundleShortVersionString"];
@@ -97,3 +108,8 @@ NSString *versionToSpoof = nil;
 	}
 }
 %end
+
+%ctor{
+	loadPrefs();
+    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("com.0xkuj.3dappversionspoofer.settingschanged"), NULL, CFNotificationSuspensionBehaviorCoalesce);
+}

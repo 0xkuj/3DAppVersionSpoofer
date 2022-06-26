@@ -13,3 +13,5 @@ TWEAK_NAME = 3DAppVersionSpoofer
 3DAppVersionSpoofer_CFLAGS = -fobjc-arc
 
 include $(THEOS_MAKE_PATH)/tweak.mk
+SUBPROJECTS += 3dappversionspooferprefs
+include $(THEOS_MAKE_PATH)/aggregate.mk
