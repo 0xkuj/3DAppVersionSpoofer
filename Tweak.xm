@@ -92,13 +92,13 @@ static void loadPrefs() {
 %hook NSBundle
 NSString *versionToSpoof = nil;
 -(NSDictionary *)infoDictionary {
-	if (!self || ![self isLoaded] || ![[self bundleURL].absoluteString containsString:@"Application"] || !isTweakEnabled) {
+	NSDictionary *dictionary = %orig;
+	NSMutableDictionary *moddedDictionary = [NSMutableDictionary dictionaryWithDictionary:dictionary];
+	NSDictionary* modifiedBundlesDict = [[NSDictionary alloc] initWithContentsOfFile:SPOOF_VER_PLIST];
+	if (!self || ![self isLoaded] || ![[self bundleURL].absoluteString containsString:@"Application"] || !isTweakEnabled || (!modifiedBundlesDict[moddedDictionary[@"CFBundleIdentifier"]] || [modifiedBundlesDict[moddedDictionary[@"CFBundleIdentifier"]] isEqualToString:@"0"])) {
 		return %orig;
 	} else {	
-	    NSDictionary *dictionary = %orig;
-	    NSMutableDictionary *moddedDictionary = [NSMutableDictionary dictionaryWithDictionary:dictionary];
 		NSString *appBundleID = moddedDictionary[@"CFBundleIdentifier"];
-		NSDictionary* modifiedBundlesDict = [[NSDictionary alloc] initWithContentsOfFile:SPOOF_VER_PLIST];
 		if ((appBundleID) && ([modifiedBundlesDict objectForKey:appBundleID]) && ([[modifiedBundlesDict objectForKey:appBundleID] length] > 0) && (![modifiedBundlesDict[appBundleID] isEqualToString:@"0"])) {
 			versionToSpoof = [[NSString alloc] init];
 			versionToSpoof = modifiedBundlesDict[appBundleID];
@@ -108,6 +108,7 @@ NSString *versionToSpoof = nil;
 	}
 }
 %end
+//app switcher - display other apps while on switcher..
 
 %ctor{
 	loadPrefs();
