@@ -1,5 +1,9 @@
 #include "Tweak.h"
 
+@interface UITraitCollection ()
++(id)currentTraitCollection;
+@end
+
 BOOL isTweakEnabled, is3DMenu;
 static void loadPrefs() { 
 	NSMutableDictionary* mainPreferenceDict = [[NSMutableDictionary alloc] initWithContentsOfFile:SPOOF_VER_PLIST];
@@ -26,9 +30,11 @@ static void loadPrefs() {
 		shortcutItems.type = SPOOF_VER_TWEAK_BUNDLE;
 		NSData *imgData = UIImagePNGRepresentation([UIImage imageNamed:@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakeverblack@2x.png"]);
 		//dark mode check
-		//if (@available(iOS 13, *)) {
-		if ([UITraitCollection currentTraitCollection].userInterfaceStyle == UIUserInterfaceStyleDark) {
-			imgData = UIImagePNGRepresentation([UIImage imageNamed:@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakeverwhite@2x.png"]);
+		NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+		if (version.majorVersion >= 13 && version.majorVersion >= 5) {
+			if ([[UITraitCollection currentTraitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark) {
+				imgData = UIImagePNGRepresentation([UIImage imageNamed:@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakeverwhite@2x.png"]);
+			}
 		}
 		if (imgData) {
 			SBSApplicationShortcutCustomImageIcon *iconImage = [[%c(SBSApplicationShortcutCustomImageIcon) alloc] initWithImagePNGData:imgData];
