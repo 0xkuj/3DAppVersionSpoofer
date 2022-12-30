@@ -113,4 +113,9 @@
 	[application openURL:URL options:@{} completionHandler:^(BOOL success) {return;}];
 }
 
+-(void)openGithub {
+	UIApplication *application = [UIApplication sharedApplication];
+	NSURL *URL = [NSURL URLWithString:@"https://github.com/0xkuj/3DAppVersionSpoofer"];
+	[application openURL:URL options:@{} completionHandler:^(BOOL success) {return;}];
+}
 @end
