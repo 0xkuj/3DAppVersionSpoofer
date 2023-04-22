@@ -50,19 +50,23 @@
 
 /* read values from preferences */
 - (id)readPreferenceValue:(PSSpecifier*)specifier {
-	NSString *path = [NSString stringWithFormat:@"/var/mobile/Library/Preferences/%@.plist", specifier.properties[@"defaults"]];
-	NSMutableDictionary *settings = [NSMutableDictionary dictionary];
-	[settings addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:path]];
-	return (settings[specifier.properties[@"key"]]) ?: specifier.properties[@"default"];
+	NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:SPOOF_VER_PLIST_WITH_PATH];
+	id obj = [dict objectForKey:[[specifier properties] objectForKey:@"key"]];
+	if(!obj)
+	{
+		obj = [[specifier properties] objectForKey:@"default"];
+	}
+	return obj;
 }
 
 /* set the value immediately when needed */
 - (void)setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier {
-	NSString *path = [NSString stringWithFormat:@"/var/mobile/Library/Preferences/%@.plist", specifier.properties[@"defaults"]];
-	NSMutableDictionary *settings = [NSMutableDictionary dictionary];
-	[settings addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:path]];
+	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:SPOOF_VER_PLIST_WITH_PATH];
+	if (!settings) {
+		settings = [NSMutableDictionary dictionary];
+	}
 	[settings setObject:value forKey:specifier.properties[@"key"]];
-	[settings writeToFile:path atomically:YES];
+	[settings writeToFile:SPOOF_VER_PLIST_WITH_PATH atomically:YES];
 	CFStringRef notificationName = (__bridge CFStringRef)specifier.properties[@"PostNotification"];
 	if (notificationName) {
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), notificationName, NULL, NULL, YES);
@@ -77,16 +81,14 @@
 	/* prepare function for "yes" button */
 	UIAlertAction* OKAction = [UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault
     		handler:^(UIAlertAction * action) {
-				[[NSFileManager defaultManager] removeItemAtURL: [NSURL fileURLWithPath:SPOOF_VER_PLIST_WITH_PATH] error: nil];
+				[[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:SPOOF_VER_PLIST_WITH_PATH] error: nil];
     			[self reload];
 				UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Notice"
 				message:@"Settings restored to default\nPlease respring your device" 
 				preferredStyle:UIAlertControllerStyleAlert];
 				UIAlertAction* DoneAction =  [UIAlertAction actionWithTitle:@"Respring" style:UIAlertActionStyleDefault
     			handler:^(UIAlertAction * action) {
-					pid_t pid;
-					const char* args[] = {"killall", "backboardd", NULL};
-					posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
+					[self respring];
 				}];
 				[alert addAction:DoneAction];
 				[self presentViewController:alert animated:YES completion:nil];
@@ -99,6 +101,12 @@
 	/* present the dialog and wait for an answer */
 	[self presentViewController:alertController animated:YES completion:nil];
 	return;
+}
+
+- (void)respring {
+	pid_t pid;
+	const char* args[] = {"killall", "backboardd", NULL};
+	posix_spawn(&pid, "/var/jb/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
 }
 
 -(void)openTwitter {

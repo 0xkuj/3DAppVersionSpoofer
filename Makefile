@@ -1,5 +1,10 @@
 INSTALL_TARGET_PROCESSES = SpringBoard
-export TARGET = iphone:clang:12.2:12.2
+ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
+    TARGET := iphone:clang:14.5:14.5
+else
+    export TARGET = iphone:clang:12.2:12.2
+endif
+
 ARCHS = arm64 arm64e
 GO_EASY_ON_ME = 1
 FINALPACKAGE = 1

@@ -13,12 +13,8 @@ static void loadPrefs() {
 
 %hook SBIconView
 - (void)setApplicationShortcutItems:(NSArray *)shortcutItems {
-	//bug with spotlight..
-	//SBApplication *sbApp = [self.icon valueForKey:@"_application"];
-	//SBApplication *sbApp = MSHookIvar<SBApplication *>((id)self.icon, "_application");
-	//if (sbApp.isSystemApplication || [sbApp.bundleIdentifier containsString:@"com.apple"]) {
-	//		return %orig;
-	//}
+	#define TDAVS_ASSET_DARK ROOT_PATH_NS(@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakeverblack@2x.png")
+	#define TDAVS_ASSET_WHITE ROOT_PATH_NS(@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakeverwhite@2x.png")
 	if (!is3DMenu) {
 		return %orig;
 	}
@@ -28,12 +24,12 @@ static void loadPrefs() {
 		SBSApplicationShortcutItem *shortcutItems = [[%c(SBSApplicationShortcutItem) alloc] init];
 		shortcutItems.localizedTitle = @"Spoof App Version";
 		shortcutItems.type = SPOOF_VER_TWEAK_BUNDLE;
-		NSData *imgData = UIImagePNGRepresentation([UIImage imageNamed:@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakeverblack@2x.png"]);
+		NSData *imgData = UIImagePNGRepresentation([UIImage imageNamed:TDAVS_ASSET_DARK]);
 		//dark mode check
 		NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
 		if (version.majorVersion >= 13 && version.majorVersion >= 5) {
 			if ([[UITraitCollection currentTraitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark) {
-				imgData = UIImagePNGRepresentation([UIImage imageNamed:@"/Library/Application Support/3DAppVersionSpoofer.bundle/fakeverwhite@2x.png"]);
+				imgData = UIImagePNGRepresentation([UIImage imageNamed:TDAVS_ASSET_WHITE]);
 			}
 		}
 		if (imgData) {
@@ -49,7 +45,8 @@ static void loadPrefs() {
 
 + (void)activateShortcut:(SBSApplicationShortcutItem *)item withBundleIdentifier:(NSString *)bundleID forIconView:(SBIconView *)iconView {
     if ([item.type isEqualToString:SPOOF_VER_TWEAK_BUNDLE]) {
-		NSString *appDefaultVersion = [[NSBundle bundleWithIdentifier:bundleID] infoDictionary][@"CFBundleShortVersionString"];
+		//i have no idea why sometimes the apdefaultversion is null, the bundle is correct and works the same as in settings..
+		NSString *appDefaultVersion = [NSBundle bundleWithIdentifier:bundleID].infoDictionary[@"CFBundleShortVersionString"];
 		NSMutableDictionary *prefPlist = [NSMutableDictionary dictionary];
 		[prefPlist addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:SPOOF_VER_PLIST]];
 		NSString *currentVer = prefPlist[bundleID];
@@ -65,7 +62,7 @@ static void loadPrefs() {
 			NSString *answerFromTextField = ([[alertController textFields][0] text].length > 0) ? [[alertController textFields][0] text] : @"0";
 			//support regions that have comma instead of dot 0-0
 			[prefPlist setObject:[answerFromTextField stringByReplacingOccurrencesOfString:@"," withString:@"."] forKey:bundleID];
-			[prefPlist writeToFile:SPOOF_VER_PLIST atomically:YES];
+			[prefPlist writeToFile:SPOOF_VER_PLIST atomically:YES]; 
 		}];
 
 		[alertController addAction:setNewValue];
@@ -80,14 +77,14 @@ static void loadPrefs() {
 		[alertController addAction:setDefaultValue];
 
 		UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style: UIAlertActionStyleCancel handler:^(UIAlertAction * action) {}];
+
 		[alertController addAction:cancelAction];
-		UIWindow* tempWindowForPrompt = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-		tempWindowForPrompt.rootViewController = [UIViewController new];
-		tempWindowForPrompt.windowLevel = UIWindowLevelAlert+1;
-		tempWindowForPrompt.hidden = NO;
-		[tempWindowForPrompt makeKeyAndVisible];
-		tempWindowForPrompt.tintColor = [[UIWindow valueForKey:@"keyWindow"] tintColor];
-		[tempWindowForPrompt.rootViewController presentViewController:alertController animated:YES completion:nil];
+
+		//seriously shit hacks
+		UIWindow *originalKeyWindow = [[UIApplication sharedApplication] keyWindow];
+		UIResponder *responder = originalKeyWindow.rootViewController.view;
+		while ([responder isKindOfClass:[UIView class]]) responder = [responder nextResponder];
+		[(UIViewController *)responder presentViewController:alertController animated:YES completion:^{}];
 	} else {
 		%orig;
 	}
@@ -114,7 +111,6 @@ NSString *versionToSpoof = nil;
 	}
 }
 %end
-//app switcher - display other apps while on switcher..
 
 %ctor{
 	loadPrefs();

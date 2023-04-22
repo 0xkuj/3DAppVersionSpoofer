@@ -1,9 +1,9 @@
 Package: com.0xkuj.3dappversionspoofer
 Name: 3DAppVersionSpoofer
-Version: 1.1.4
+Version: 1.2
 Architecture: iphoneos-arm
 Description: A tweak to add app spoofing capabilities right from your 3D menu and prefs
 Maintainer: 0xkuj
 Author: 0xkuj
 Section: Tweaks
-Depends: mobilesubstrate (>= 0.9.5000), com.opa334.altlist
+Depends: com.opa334.altlist

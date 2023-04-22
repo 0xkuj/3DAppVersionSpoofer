@@ -1,7 +1,9 @@
 #import <Preferences/PSListController.h>
 #import <Preferences/PSSpecifier.h>
+#import <rootless.h>
+
 #define SPOOF_VER_PLIST @"com.0xkuj.3dappversionspoofer"
-#define SPOOF_VER_PLIST_WITH_PATH @"/var/mobile/Library/Preferences/com.0xkuj.3dappversionspoofer.plist"
+#define SPOOF_VER_PLIST_WITH_PATH ROOT_PATH_NS(@"/var/mobile/Library/Preferences/com.0xkuj.3dappversionspoofer.plist")
 
 @interface AVSRootListController : PSListController
 {
