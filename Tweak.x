@@ -53,8 +53,11 @@ static void loadPrefs() {
 + (void)activateShortcut:(SBSApplicationShortcutItem *)item withBundleIdentifier:(NSString *)bundleID forIconView:(SBIconView *)iconView {
     if ([item.type isEqualToString:SPOOF_VER_TWEAK_BUNDLE]) {
 		//i have no idea why sometimes the apdefaultversion is null, the bundle is correct and works the same as in settings..
-		NSString *appDefaultVersion = [NSBundle bundleWithIdentifier:bundleID].infoDictionary[@"CFBundleShortVersionString"];
-		NSString *appExecName = [NSBundle bundleWithIdentifier:bundleID].infoDictionary[@"CFBundleExecutable"];
+		NSURL *appFolderURL = [iconView applicationBundleURLForShortcuts];
+		NSURL *infoPlistURL = [appFolderURL URLByAppendingPathComponent:@"Info.plist"];
+		NSDictionary *infoDictionary = [NSDictionary dictionaryWithContentsOfFile:infoPlistURL.path];
+		NSString *appDefaultVersion = infoDictionary[@"CFBundleShortVersionString"];
+		NSString *appExecName = infoDictionary[@"CFBundleExecutable"];
 		NSMutableDictionary *prefPlist = [NSMutableDictionary dictionary];
 		[prefPlist addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:SPOOF_VER_PLIST]];
 		//support old prefs

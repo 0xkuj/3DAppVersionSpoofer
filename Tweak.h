@@ -32,6 +32,7 @@
 @end
 
 @interface SBIconView : UIView
+- (id)applicationBundleURLForShortcuts;
 @property SBIcon *icon;
 @end
 
