@@ -77,8 +77,25 @@ static void loadPrefs() {
 																	message:[NSString stringWithFormat:@"WARNING: This can cause unexpected behavior in your app.\nBundle ID: %@\nCurrent Spoofed Version: %@\nCurrent Spoofed iOS Version: %@\nDefault App Version: %@\n\nWhat is the version number you want to spoof?\n\n\n",bundleID,currentVer,currentiOSSpoofedVersion,appDefaultVersion]
 																	preferredStyle:UIAlertControllerStyleAlert];
 
-		[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {textField.placeholder = @"Enter Version Number"; textField.keyboardType = UIKeyboardTypeDecimalPad;}];
-		[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {textField.placeholder = @"Enter iOS Version (Optional)"; textField.keyboardType = UIKeyboardTypeDecimalPad;}];
+		[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+			if ([currentVer isEqualToString:@"Default"]) {
+				textField.placeholder = @"Enter Version Number"; 
+			} else {
+				textField.text = currentVer;
+			}
+			
+			textField.keyboardType = UIKeyboardTypeDecimalPad;
+		}];
+
+		[alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+			if ([currentiOSSpoofedVersion isEqualToString:@"Default"]) {
+				textField.placeholder = @"Enter iOS Version (Optional)"; 
+			} else {
+				textField.text = currentiOSSpoofedVersion;
+			}
+			
+			textField.keyboardType = UIKeyboardTypeDecimalPad;
+		}];
 
 		UIAlertAction *setNewValue = [UIAlertAction actionWithTitle:@"Set Spoofed Version" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
 			NSString *spoofedAppVersion = ([[alertController textFields][0] text].length > 0) ? [[alertController textFields][0] text] : prefPlist[bundleID] ? prefPlist[bundleID] : @"0";
@@ -108,17 +125,18 @@ static void loadPrefs() {
 		
 		[alertController.view addSubview:experimentalSpoofSwitch];
 
-		// Add a UILabel to explain what the switch does
 		UILabel *switchLabel = [[UILabel alloc] init];
 		switchLabel.text = @"EXPERIMENTAL SPOOFING";
-		switchLabel.numberOfLines = 0; // Allow multiple lines
+		switchLabel.numberOfLines = 0;
 		switchLabel.textAlignment = NSTextAlignmentLeft;
 		switchLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleCaption1];
+		switchLabel.font = [UIFont systemFontOfSize:12.0];
+
 		[alertController.view addSubview:switchLabel];
 		[experimentalSpoofSwitch setTranslatesAutoresizingMaskIntoConstraints:NO];
 		[switchLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
 		NSLayoutConstraint *leadingConstraint = [NSLayoutConstraint constraintWithItem:experimentalSpoofSwitch attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:alertController.view attribute:NSLayoutAttributeLeadingMargin multiplier:1.0 constant:0];
-		NSLayoutConstraint *topConstraint = [NSLayoutConstraint constraintWithItem:experimentalSpoofSwitch attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:alertController.view attribute:NSLayoutAttributeTopMargin multiplier:1.0 constant:200];
+		NSLayoutConstraint *topConstraint = [NSLayoutConstraint constraintWithItem:experimentalSpoofSwitch attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:alertController.view attribute:NSLayoutAttributeTopMargin multiplier:1.0 constant:195];
 		NSLayoutConstraint *labelLeadingConstraint = [NSLayoutConstraint constraintWithItem:switchLabel attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:experimentalSpoofSwitch attribute:NSLayoutAttributeTrailing multiplier:1.0 constant:8];
 		NSLayoutConstraint *labelCenterYConstraint = [NSLayoutConstraint constraintWithItem:switchLabel attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:experimentalSpoofSwitch attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0];
 		[alertController.view addConstraints:@[leadingConstraint, topConstraint, labelLeadingConstraint, labelCenterYConstraint]];
